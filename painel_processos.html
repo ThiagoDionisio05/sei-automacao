@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Processos SEI</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --border: #dde2e7;
+    --text: #1f2933;
+    --text-muted: #6b7684;
+    --accent: #0b6e4f;
+    --accent-hover: #0a5c42;
+    --stripe: #f8fafb;
+    --danger: #c0392b;
+    --danger-hover: #a52f21;
+    --header-bg: #eef2f4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 24px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Tahoma, Verdana, Arial, sans-serif;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  header {
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(16, 24, 32, 0.04);
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--header-bg);
+    flex-wrap: wrap;
+  }
+  .toolbar .count {
+    margin-left: auto;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background-color .12s ease, border-color .12s ease;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    background: #fff;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: #f0f2f4; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--header-bg);
+    position: sticky;
+    top: 0;
+  }
+  tbody tr:nth-child(even) { background: var(--stripe); }
+  tbody tr:hover { background: #eef7f2; }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  td input {
+    width: 100%;
+    font: inherit;
+    font-size: 13.5px;
+    padding: 8px 9px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text);
+  }
+  td input:hover { border-color: var(--border); }
+  td input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.12);
+  }
+  td.col-numero input { font-variant-numeric: tabular-nums; font-weight: 600; }
+  td.col-count {
+    width: 64px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  td.col-actions { width: 44px; text-align: center; }
+  td.col-status { width: 110px; }
+  .badge {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge-completo {
+    background: #e3f6ea;
+    color: #0b6e4f;
+  }
+  .badge-incompleto {
+    background: #fdecea;
+    color: var(--danger-hover);
+  }
+  .badge-manual {
+    background: #eef2f4;
+    color: var(--text-muted);
+  }
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+    padding: 6px 8px;
+    border-radius: 6px;
+  }
+  .remove-btn:hover { background: #fdecea; color: var(--danger-hover); }
+  .empty-state {
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  .save-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--header-bg);
+  }
+  .save-hint b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Painel de Processos SEI</h1>
+    <div class="subtitle">Números sincronizados automaticamente com <code>status/processados.json</code> — preencha o Nome manualmente.</div>
+  </header>
+
+  <div class="card">
+    <div class="toolbar">
+      <button class="btn-primary" id="btnAdd">+ Nova linha</button>
+      <button class="btn-secondary" id="btnExport">Exportar CSV</button>
+      <button class="btn-secondary" id="btnReset">Restaurar números originais</button>
+      <span class="count" id="count"></span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="col-count">Nº</th>
+          <th style="width:220px;">Número do Processo SEI</th>
+          <th class="col-status">Status</th>
+          <th>Nome</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" hidden>Nenhuma linha ainda. Clique em "+ Nova linha".</div>
+    <div class="save-hint">Suas edições ficam salvas neste navegador (<b>localStorage</b>) — feche e reabra o arquivo à vontade, os dados continuam aqui. Números novos de <code>dados_processos.js</code> são adicionados sozinhos, sem apagar o que você já preencheu. Use "Exportar CSV" pra guardar uma cópia fora do navegador.</div>
+  </div>
+</div>
+
+<script src="dados_processos.js"></script>
+<script>
+  const STORAGE_KEY = "sei_painel_processos_v1";
+
+  // dados_processos.js (gerado por src/painel.py) define window.PROCESSOS_ORIGINAIS
+  // como [{numero, status}, ...]. Se o arquivo não existir ainda (painel aberto
+  // antes de rodar a automação pela primeira vez), cai pra lista vazia.
+  const PROCESSOS_ORIGINAIS = window.PROCESSOS_ORIGINAIS || [];
+  const STATUS_POR_NUMERO = new Map(PROCESSOS_ORIGINAIS.map(p => [p.numero, p.status]));
+
+  function linhasIniciais() {
+    return PROCESSOS_ORIGINAIS.map(p => ({ numero: p.numero, nome: "", status: p.status }));
+  }
+
+  // Sincroniza com PROCESSOS_ORIGINAIS (a fonte da verdade, vinda do
+  // status.json filtrado por data): mantém o Nome de quem já existia,
+  // ACRESCENTA os números novos, REMOVE quem não está mais na lista (ex.:
+  // processo antigo que saiu do painel por causa do corte de data), e
+  // ATUALIZA o status de cada um (pode ter virado Completo desde a última
+  // vez que o painel foi aberto). Linhas digitadas manualmente sem número
+  // (numero === "") são mantidas, já que não têm como ser comparadas.
+  function fundirComOriginais(linhasSalvas) {
+    const numerosOriginais = new Set(STATUS_POR_NUMERO.keys());
+    const existentes = linhasSalvas
+      .filter(l => l.numero === "" || numerosOriginais.has(l.numero))
+      .map(l => l.numero === "" ? l : { ...l, status: STATUS_POR_NUMERO.get(l.numero) });
+    const numerosConhecidos = new Set(existentes.map(l => l.numero));
+    const novas = PROCESSOS_ORIGINAIS
+      .filter(p => !numerosConhecidos.has(p.numero))
+      .map(p => ({ numero: p.numero, nome: "", status: p.status }));
+    return existentes.concat(novas);
+  }
+
+  function carregar() {
+    try {
+      const salvo = localStorage.getItem(STORAGE_KEY);
+      if (salvo) return fundirComOriginais(JSON.parse(salvo));
+    } catch (e) {}
+    return linhasIniciais();
+  }
+
+  function salvar(linhas) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(linhas));
+    } catch (e) {}
+  }
+
+  let linhas = carregar();
+  salvar(linhas);
+
+  const tbody = document.getElementById("tbody");
+  const emptyState = document.getElementById("emptyState");
+  const countEl = document.getElementById("count");
+
+  function render() {
+    tbody.innerHTML = "";
+    emptyState.hidden = linhas.length > 0;
+    linhas.forEach((linha, i) => {
+      const tr = document.createElement("tr");
+
+      const tdCount = document.createElement("td");
+      tdCount.className = "col-count";
+      tdCount.textContent = i + 1;
+      tr.appendChild(tdCount);
+
+      const tdNumero = document.createElement("td");
+      tdNumero.className = "col-numero";
+      const inNumero = document.createElement("input");
+      inNumero.value = linha.numero;
+      inNumero.placeholder = "00000.000000/0000-00";
+      inNumero.addEventListener("input", () => { linha.numero = inNumero.value; salvar(linhas); });
+      tdNumero.appendChild(inNumero);
+
+      const tdStatus = document.createElement("td");
+      tdStatus.className = "col-status";
+      const badge = document.createElement("span");
+      if (linha.status === "concluido") {
+        badge.className = "badge badge-completo";
+        badge.textContent = "Completo";
+      } else if (linha.status === "processo_criado") {
+        badge.className = "badge badge-incompleto";
+        badge.textContent = "Incompleto";
+        badge.title = "Processo criado, mas o fluxo não terminou (falhou em atribuir/relacionar/documentos). Complete com testar_documento.py.";
+      } else {
+        badge.className = "badge badge-manual";
+        badge.textContent = "Manual";
+        badge.title = "Linha adicionada manualmente, sem status vindo da automação.";
+      }
+      tdStatus.appendChild(badge);
+
+      const tdNome = document.createElement("td");
+      const inNome = document.createElement("input");
+      inNome.value = linha.nome;
+      inNome.placeholder = "Nome";
+      inNome.addEventListener("input", () => { linha.nome = inNome.value; salvar(linhas); });
+      tdNome.appendChild(inNome);
+
+      const tdActions = document.createElement("td");
+      tdActions.className = "col-actions";
+      const btnRemove = document.createElement("button");
+      btnRemove.className = "remove-btn";
+      btnRemove.title = "Remover linha";
+      btnRemove.textContent = "✕";
+      btnRemove.addEventListener("click", () => {
+        linhas.splice(i, 1);
+        salvar(linhas);
+        render();
+      });
+      tdActions.appendChild(btnRemove);
+
+      tr.appendChild(tdNumero);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdNome);
+      tr.appendChild(tdActions);
+      tbody.appendChild(tr);
+    });
+
+    const incompletos = linhas.filter(l => l.status === "processo_criado").length;
+    countEl.textContent = linhas.length + (linhas.length === 1 ? " linha" : " linhas")
+      + (incompletos > 0 ? ` · ${incompletos} incompleta${incompletos === 1 ? "" : "s"}` : "");
+  }
+
+  document.getElementById("btnAdd").addEventListener("click", () => {
+    linhas.push({ numero: "", nome: "" });
+    salvar(linhas);
+    render();
+  });
+
+  document.getElementById("btnReset").addEventListener("click", () => {
+    if (!confirm("Isso substitui a lista atual pelos números originais do status.json (o Nome preenchido será perdido). Continuar?")) return;
+    linhas = linhasIniciais();
+    salvar(linhas);
+    render();
+  });
+
+  document.getElementById("btnExport").addEventListener("click", () => {
+    const cabecalho = "Nº,Numero do Processo SEI,Status,Nome\n";
+    const rotuloStatus = s => s === "concluido" ? "Completo" : s === "processo_criado" ? "Incompleto" : "Manual";
+    const linhasCsv = linhas.map((l, i) => {
+      const esc = v => `"${String(v || "").replace(/"/g, '""')}"`;
+      return [i + 1, esc(l.numero), esc(rotuloStatus(l.status)), esc(l.nome)].join(",");
+    }).join("\n");
+    const csv = cabecalho + linhasCsv;
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "processos_sei.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  render();
+</script>
+</body>
+</html>

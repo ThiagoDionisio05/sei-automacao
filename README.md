@@ -8,7 +8,6 @@
 [![Playwright](https://img.shields.io/badge/Playwright-automação_web-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev/python/)
 [![pandas](https://img.shields.io/badge/pandas-planilhas-150458?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 ![Status](https://img.shields.io/badge/status-em_uso_real-success)
-[![Licença: MIT](https://img.shields.io/badge/licença-MIT-yellow.svg)](LICENSE)
 
 **Série:** **Parte 1: Criação de processos** •
 [Parte 2: Documentos pessoais](https://github.com/ThiagoDionisio05/sei-automacao-pt2) •
@@ -306,6 +305,8 @@ Projeto independente, criado para uso pessoal e fins de estudo. **Não é
 afiliado nem endossado** por nenhum órgão público ou pelos mantenedores do SEI.
 Use apenas em sistemas aos quais você tem acesso autorizado e de acordo com as
 políticas da sua instituição.
+
+Código disponibilizado apenas para consulta, como portfólio. Nenhuma licença de uso é concedida.
 
 <div align="center">
 
